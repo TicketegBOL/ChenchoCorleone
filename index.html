@@ -180,7 +180,7 @@
                         <path id="sector-400" onclick="selectSector('Platea Baja', 400)" class="sector" d="M 70 210 A 180 180 0 0 1 330 210 L 300 240 A 150 150 0 0 0 100 240 Z" />
                         <path id="sector-300" onclick="selectSector('Platea Media', 300)" class="sector" d="M 40 180 A 210 210 0 0 1 360 180 L 330 210 A 180 180 0 0 0 70 210 Z" />
                         <path id="sector-150" onclick="selectSector('Platea Alta', 150)" class="sector" d="M 10 150 A 240 240 0 0 1 390 150 L 360 180 A 210 210 0 0 0 40 180 Z" />
-                        <g font-size="11" font-weight="bold" fill="white" font-family="Orbitron" opacity="1" class="pointer-events-none">
+                        <g font-size="11" font-weight="bold" fill="white" font-family="Orbitron" opacity="0.3" class="pointer-events-none">
                             <text x="200" y="215" text-anchor="middle">VIP PERREO</text>
                             <text x="200" y="180" text-anchor="middle">PLATEA BAJA</text>
                             <text x="200" y="140" text-anchor="middle">PLATEA MEDIA</text>
@@ -214,8 +214,10 @@
             <span class="text-[#00f3ff] font-bold tracking-[0.3em] uppercase text-[10px] mb-4 block">Paso 4</span>
             <h3 class="text-3xl font-black font-urban mb-4 uppercase">Método Seguro de Pago</h3>
             <p class="text-gray-400 text-sm mb-12">Genera el código QR oficial de Ticketeg para realizar la transferencia desde tu app favorita.</p>
-            <button onclick="showModal()" class="btn-glow w-full max-w-md py-7 rounded-2xl font-black text-xl uppercase tracking-widest mx-auto flex items-center justify-center gap-4">
-                <i class="fas fa-qrcode text-3xl"></i> GENERAR METODO DE PAGO
+            
+            <button onclick="showModal()" class="btn-glow w-full max-w-md py-6 md:py-7 px-4 rounded-2xl font-black text-sm md:text-xl uppercase tracking-widest mx-auto flex items-center justify-center gap-3 md:gap-4">
+                <i class="fas fa-qrcode text-2xl md:text-3xl flex-shrink-0"></i> 
+                <span>GENERAR METODO DE PAGO</span>
             </button>
         </div>
     </section>
@@ -259,9 +261,11 @@
                 <i class="fas fa-times text-xl"></i>
             </button>
             
-            <div class="w-full md:w-1/2 p-12 flex flex-col items-center justify-center bg-white/5 border-b md:border-b-0 md:border-r border-white/10">
-                <div class="bg-white p-6 rounded-[2.5rem] shadow-2xl mb-8">
-                    <img id="qr-img" src="" class="w-64 h-64 md:w-80 md:h-80">
+            <!-- CORRECCIÓN APLICADA AQUÍ: Padding reducido en móvil (p-6) y contenedor de imagen flexible -->
+            <div class="w-full md:w-1/2 p-6 md:p-12 flex flex-col items-center justify-center bg-white/5 border-b md:border-b-0 md:border-r border-white/10">
+                <div class="bg-white p-4 md:p-6 rounded-[2.5rem] shadow-2xl mb-8 flex items-center justify-center w-full max-w-[280px] md:max-w-sm">
+                    <!-- IMAGEN QR: aspect-square forza que sea cuadrada, w-full ajusta al ancho disponible -->
+                    <img id="qr-img" src="" class="w-full h-auto aspect-square object-contain">
                 </div>
                 <div class="text-center">
                     <p class="text-[11px] font-black uppercase tracking-[0.5em] text-[#39ff14] mb-2">Pago Seguro QR</p>
