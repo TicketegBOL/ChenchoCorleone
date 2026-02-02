@@ -2,169 +2,494 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Landing 9:16 Responsive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hunter Designer Experience</title>
+    <!-- GSAP Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Fuentes: Montserrat y Playfair Display (para toques elegantes) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    
     <style>
-        /* Reset básico */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* =========================================
+           CONFIGURACIÓN
+           ========================================= */
+        :root {
+            --bg-image: url('fondo.jpg'); 
+            --gold-light: #FFF5C3;
+            --gold-mid: #D4AF37;
+            --gold-dark: #886C21;
+            --text-black: #0a0a0a;
+            --glass-bg: rgba(0, 0, 0, 0.85);
         }
+
+        /* =========================================
+           RESET & BASE
+           ========================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            /* Fondo oscuro para resaltar el contenido central */
-            background-color: #111;
-            /* Centramos todo vertical y horizontalmente */
+            font-family: 'Montserrat', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            overflow: hidden; /* Evitar scroll si no es necesario */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            color: white;
         }
 
-        /* EL CONTENEDOR MAESTRO 
-           Aquí ocurre la magia del 9:16
-        */
-        .mobile-container {
-            position: relative; /* Necesario para que los botones absolutos se guíen por esto */
-            
-            /* FUERZA LA PROPORCIÓN 9:16 SIEMPRE */
-            aspect-ratio: 9 / 16; 
-            
-            /* Lógica de tamaño:
-               1. Intenta ocupar el 95% de la altura de la pantalla (95vh).
-               2. Pero nunca seas más ancho que el 100% de la pantalla (100vw).
-               Esto asegura que quepa completa en cualquier dispositivo.
-            */
-            height: 95vh;
-            max-width: 100vw; 
-
-            /* Sombra para darle elegancia */
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            border-radius: 20px; /* Bordes redondeados tipo celular moderno */
-            overflow: hidden; /* Recorta la imagen en los bordes redondeados */
-        }
-
-        /* LA IMAGEN DE FONDO */
-        .background-image {
-            width: 100%;
-            height: 100%;
-            /* Aquí pones tu imagen 1080x1920 */
-            background-image: url('https://images.unsplash.com/photo-1535385793343-27dff1413c5a?q=80&w=1080&h=1920&fit=crop'); 
+        /* =========================================
+           FONDO BACKDROP
+           ========================================= */
+        .backdrop-blur {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--bg-image);
             background-size: cover;
             background-position: center;
+            filter: blur(30px) brightness(0.4);
+            transform: scale(1.1);
+            z-index: 0;
         }
 
-        /* ESTILOS DE LOS BOTONES */
-        .btn {
-            position: absolute; /* Posición absoluta respecto al .mobile-container */
-            
-            /* Estilos visuales del botón */
-            background: rgba(255, 255, 255, 0.2); /* Semi-transparente */
-            backdrop-filter: blur(10px); /* Efecto vidrio */
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            text-decoration: none;
+        /* =========================================
+           CONTENEDOR PRINCIPAL (9:16)
+           ========================================= */
+        .mobile-wrapper {
+            position: relative;
+            z-index: 10;
+            aspect-ratio: 9 / 16;
+            height: 100dvh;
+            max-height: 100vh;
+            max-width: 100vw;
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+            overflow: hidden;
+        }
+
+        @media (min-width: 600px) {
+            .mobile-wrapper { border-radius: 20px; height: 95vh; }
+        }
+
+        /* =========================================
+           PANTALLAS (VIEWS)
+           ========================================= */
+        .view-section {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none; /* Se activan con JS */
+            flex-direction: column;
+            opacity: 0;
+        }
+
+        .view-section.active {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-radius: 50px;
-            transition: transform 0.2s, background 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            
-            /* TRUCO IMPORTANTE DE CENTRADO:
-               transform: translate(-50%, -50%);
-               Esto hace que el punto de referencia sea el CENTRO del botón, 
-               no la esquina superior izquierda. Así el posicionamiento es exacto.
-            */
+            opacity: 1; /* GSAP manejará la transición, pero esto es fallback */
+            z-index: 100;
+        }
+
+        /* Home View conserva la imagen de fondo limpia */
+        #home-view {
+            display: block; /* Visible por defecto */
+            opacity: 1;
+            z-index: 50;
+        }
+
+        /* Subpáginas tienen fondo oscuro semitransparente */
+        .sub-page {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            padding: 20px;
+        }
+
+        /* =========================================
+           BOTONES PRINCIPALES (GOLD ULTRA)
+           ========================================= */
+        .btn-gold {
+            position: absolute;
             transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
             
-            /* Tamaño del texto responsivo basado en el ancho del contenedor */
-            font-size: clamp(12px, 2.5vh, 20px); 
-        }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.4);
-            transform: translate(-50%, -50%) scale(1.05); /* Mantiene el centro y agranda */
+            /* Tipografía LLAMATIVA */
+            color: var(--text-black);
+            text-decoration: none;
+            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900; /* Ultra Bold */
+            font-size: 15px;
+            letter-spacing: 2px;
+            
+            /* Estilo Oro Metalizado */
+            background: linear-gradient(135deg, #fceabb 0%, #f8b500 50%, #fbdf93 100%);
+            border: 2px solid #fff;
+            border-radius: 50px;
+            
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,255,255,0.5);
             cursor: pointer;
+            z-index: 20;
+            overflow: hidden; /* Para efecto brillo */
         }
 
-        /* POSICIONAMIENTO CON PORCENTAJES 
-           Ajusta estos valores según dónde quieras los botones en tu imagen
-        */
+        /* Efecto Brillo (Shine) al pasar */
+        .btn-gold::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+            transform: skewX(-20deg);
+            transition: 0.5s;
+        }
+        .btn-gold:hover::after { left: 150%; transition: 0.7s; }
 
-        /* Botón 1: Arriba */
-        .btn-1 {
-            top: 25%;   /* Al 25% de altura desde arriba */
-            left: 50%;  /* Centrado horizontalmente */
-            width: 70%; /* Ancho del 70% del contenedor */
-            height: 7%; /* Alto del 7% del contenedor */
+        /* POSICIONES (Ajustables) */
+        #btn-invitacion { top: 50%; left: 75%; width: 42%; height: 6.5%; }
+        #btn-galeria { top: 59%; left: 75%; width: 42%; height: 6.5%; }
+        #btn-recuerdo { top: 80%; left: 50%; width: 55%; height: 7.5%; font-size: 16px; }
+
+        /* =========================================
+           SUBPÁGINAS - ESTILOS ESPECÍFICOS
+           ========================================= */
+        
+        /* Botón Volver */
+        .btn-back {
+            position: absolute;
+            top: 20px; left: 20px;
+            background: transparent;
+            border: 1px solid var(--gold-mid);
+            color: var(--gold-mid);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 200;
         }
 
-        /* Botón 2: Medio */
-        .btn-2 {
-            top: 50%;
+        /* 1. INVITACIÓN */
+        .invite-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 1px solid var(--gold-mid);
+            padding: 20px;
+            margin-top: 50px; /* espacio para botón volver */
+            margin-bottom: 20px;
+        }
+        .invite-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: var(--gold-mid);
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+        .invite-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #eee;
+        }
+
+        /* 2. GALERÍA */
+        .gallery-container {
+            margin-top: 80px;
+            height: 80%;
+            overflow-y: scroll; /* Scroll vertical */
+            padding-bottom: 50px;
+            /* Ocultar barra scroll */
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+        .gallery-container::-webkit-scrollbar { display: none; }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .gallery-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid var(--gold-dark);
+            opacity: 0; /* Para animar entrada */
+            transform: translateY(20px);
+        }
+
+        /* 3. RECUERDO */
+        .memory-header {
+            margin-top: 80px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .memory-title {
+            color: var(--gold-mid);
+            font-size: 2rem;
+            text-transform: uppercase;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        .memory-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            align-items: center;
+        }
+        .btn-elegant {
+            width: 80%;
+            padding: 15px;
+            background: transparent;
+            border: 1px solid var(--gold-light);
+            color: var(--gold-light);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-align: center;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-elegant:hover {
+            background: var(--gold-mid);
+            color: #000;
+        }
+
+        /* =========================================
+           FOOTER (Parpadeante)
+           ========================================= */
+        .footer-hunter {
+            position: absolute;
+            bottom: 3%;
             left: 50%;
-            width: 70%;
-            height: 7%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            text-align: center;
+            z-index: 60;
+            pointer-events: none;
+        }
+        
+        .footer-hunter span {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            animation: flicker 3s infinite alternate;
         }
 
-        /* Botón 3: Abajo */
-        .btn-3 {
-            top: 75%;
-            left: 50%;
-            width: 70%;
-            height: 7%;
-        }
-
-        /* Botón pequeño ejemplo (icono o logo) */
-        .btn-circle {
-            top: 90%;
-            left: 85%;
-            width: 15%;
-            /* Usamos aspect-ratio 1/1 para hacerlo cuadrado/circular */
-            aspect-ratio: 1 / 1; 
-            border-radius: 50%;
-            font-size: 20px;
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 
+                    0 0 4px #fff,
+                    0 0 10px #fff,
+                    0 0 20px var(--gold-mid),
+                    0 0 40px var(--gold-mid);
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+                opacity: 0.5;
+            }
         }
 
     </style>
 </head>
 <body>
 
-    <!-- El contenedor que simula la pantalla 9:16 -->
-    <div class="mobile-container">
-        
-        <!-- Capa de imagen de fondo -->
-        <div class="background-image"></div>
+    <!-- Fondo Backdrop para PC -->
+    <div class="backdrop-blur"></div>
 
-        <!-- 
-             BOTONES 
-             El texto o contenido puede cambiar, pero su posición es fija en %
-        -->
-        <a href="#" class="btn btn-1">Catálogo</a>
-        <a href="#" class="btn btn-2">Ofertas</a>
-        <a href="#" class="btn btn-3">Contacto</a>
+    <div class="mobile-wrapper">
         
-        <!-- Ejemplo de un botón circular flotante -->
-        <a href="#" class="btn btn-circle">👋</a>
+        <!-- =========================================
+             VISTA 1: HOME (Menú Principal)
+             ========================================= -->
+        <section id="home-view">
+            <!-- BOTÓN 1 -->
+            <a onclick="navigateTo('invitacion')" class="btn-gold" id="btn-invitacion">
+                Invitación
+            </a>
+
+            <!-- BOTÓN 2 -->
+            <a onclick="navigateTo('galeria')" class="btn-gold" id="btn-galeria">
+                Galería
+            </a>
+
+            <!-- BOTÓN 3 -->
+            <a onclick="navigateTo('recuerdo')" class="btn-gold" id="btn-recuerdo">
+                Recuerdo
+            </a>
+
+            <!-- Footer -->
+            <div class="footer-hunter">
+                <span>HunterDesigner</span>
+            </div>
+        </section>
+
+        <!-- =========================================
+             VISTA 2: INVITACIÓN (Subpágina)
+             ========================================= -->
+        <section id="view-invitacion" class="view-section sub-page">
+            <button class="btn-back" onclick="goHome()">← Volver</button>
+            
+            <div class="invite-content">
+                <h2 class="invite-title">You are<br>Invited</h2>
+                <p class="invite-text">
+                    Celebra con nosotros una noche inolvidable llena de magia, elegancia y momentos únicos.
+                </p>
+                <div style="width: 50px; height: 2px; background: var(--gold-mid); margin: 20px auto;"></div>
+                <p style="font-size: 0.9rem; color: var(--gold-light);">
+                    VIERNES 24 DE NOVIEMBRE<br>
+                    20:00 HRS<br>
+                    HOTEL IMPERIAL
+                </p>
+            </div>
+        </section>
+
+        <!-- =========================================
+             VISTA 3: GALERÍA (Carousel)
+             ========================================= -->
+        <section id="view-galeria" class="view-section sub-page">
+            <button class="btn-back" onclick="goHome()">← Volver</button>
+            
+            <div class="gallery-container">
+                <div class="gallery-grid">
+                    <!-- 8 Imágenes de ejemplo (Unsplash) -->
+                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80" class="gallery-img">
+                    <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80" class="gallery-img">
+                    <img src="https://images.unsplash.com/photo-1520854221256-17451cc330e7?auto=format&fit=crop&w=600&q=80" class="gallery-img">
+                    <img src="https://images.unsplash.com/photo-1519225421980-715cb0202128?auto=format&fit=crop&w=600&q=80" class="gallery-img">
+                    <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=600&q=80" class="gallery-img">
+                    <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80" class="gallery-img">
+                    <img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=600&q=80" class="gallery-img">
+                    <img src="https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?auto=format&fit=crop&w=600&q=80" class="gallery-img">
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================
+             VISTA 4: RECUERDO (Botones)
+             ========================================= -->
+        <section id="view-recuerdo" class="view-section sub-page">
+            <button class="btn-back" onclick="goHome()">← Volver</button>
+            
+            <div class="memory-header">
+                <h2 class="memory-title">Memories</h2>
+                <p>Nuestra historia en capítulos</p>
+            </div>
+
+            <div class="memory-actions">
+                <button class="btn-elegant">Biografía</button>
+                <button class="btn-elegant">Video Highlights</button>
+                <button class="btn-elegant">Libro de Firmas</button>
+                <button class="btn-elegant">Agradecimientos</button>
+            </div>
+        </section>
 
     </div>
 
-    <!-- Script opcional para copiar texto si fuera necesario, o lógica de la landing -->
+    <!-- SCRIPT GSAP LOGIC -->
     <script>
-        // Efecto simple al hacer click (para feedback visual)
-        document.querySelectorAll('.btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                // e.preventDefault(); // Descomentar si no quieres que navegue
-                console.log("Click en: " + this.innerText);
-            });
+        // Animación Inicial de los botones del Home
+        gsap.from(".btn-gold", {
+            duration: 1.2,
+            y: 50,
+            opacity: 0,
+            stagger: 0.2,
+            ease: "power3.out",
+            delay: 0.5
         });
+
+        // Función para Navegar a Subpáginas
+        function navigateTo(pageId) {
+            // 1. Desvanecer el Home
+            gsap.to("#home-view", {
+                duration: 0.5,
+                opacity: 0,
+                scale: 0.95,
+                pointerEvents: "none",
+                ease: "power2.inOut",
+                onComplete: () => {
+                    document.getElementById('home-view').style.display = 'none';
+                }
+            });
+
+            // 2. Preparar y Mostrar la nueva vista
+            const view = document.getElementById(`view-${pageId}`);
+            view.style.display = 'flex';
+            
+            gsap.fromTo(view, 
+                { opacity: 0, scale: 1.05 },
+                { duration: 0.6, opacity: 1, scale: 1, ease: "power2.out", delay: 0.1 }
+            );
+
+            // ANIMACIONES ESPECÍFICAS POR PÁGINA
+            if(pageId === 'invitacion') {
+                gsap.fromTo(".invite-content > *", 
+                    { y: 30, opacity: 0 },
+                    { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, delay: 0.3 }
+                );
+            }
+            
+            if(pageId === 'galeria') {
+                gsap.fromTo(".gallery-img", 
+                    { y: 50, opacity: 0 },
+                    { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, delay: 0.3 }
+                );
+            }
+
+            if(pageId === 'recuerdo') {
+                gsap.fromTo(".memory-header", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.3 });
+                gsap.fromTo(".btn-elegant", 
+                    { x: -50, opacity: 0 },
+                    { x: 0, opacity: 1, duration: 0.5, stagger: 0.1, delay: 0.5 }
+                );
+            }
+        }
+
+        // Función para volver al Home
+        function goHome() {
+            // Ocultar todas las subpáginas
+            gsap.to(".view-section.sub-page", {
+                duration: 0.4,
+                opacity: 0,
+                ease: "power2.in",
+                onComplete: () => {
+                    document.querySelectorAll('.view-section.sub-page').forEach(el => el.style.display = 'none');
+                    
+                    // Mostrar Home
+                    const home = document.getElementById('home-view');
+                    home.style.display = 'block';
+                    home.style.pointerEvents = 'all';
+                    
+                    gsap.fromTo(home,
+                        { opacity: 0, scale: 0.95 },
+                        { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }
+                    );
+                }
+            });
+        }
+
+        // Fix height mobile
+        function setAppHeight() {
+            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+        }
+        window.addEventListener('resize', setAppHeight);
+        setAppHeight();
     </script>
 </body>
 </html>
