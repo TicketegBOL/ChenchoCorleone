@@ -4,20 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hunter Designer Experience</title>
-    <!-- GSAP Core -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     
-    <!-- Fuentes: Montserrat y Playfair Display (para toques elegantes) -->
+    <!-- GSAP Core & Draggable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    
+    <!-- Fuentes: Montserrat, Playfair Display y Great Vibes (Script elegante) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Playfair+Display:ital,wght@0,600;1,600&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <!-- Iconos Phosphor (para el botón volver) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
         /* =========================================
-           CONFIGURACIÓN
+           CONFIGURACIÓN (Tu Estilo Original)
            ========================================= */
         :root {
-            --bg-image: url('fondo.jpg'); 
+            --bg-image: url('https://images.unsplash.com/photo-1604014237800-1c9102c219da?q=80&w=1000&auto=format&fit=crop'); 
+            --bg-invitacion: url('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop');
             --gold-light: #FFF5C3;
             --gold-mid: #D4AF37;
             --gold-dark: #886C21;
@@ -43,7 +49,25 @@
         }
 
         /* =========================================
-           FONDO BACKDROP
+           PARTÍCULAS FLOTANTES
+           ========================================= */
+        #particles-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 15; /* Encima del fondo, debajo de los botones */
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255, 245, 195, 0.6); /* Beige/Blanco suave */
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        /* =========================================
+           FONDO BACKDROP (Solo visible en PC)
            ========================================= */
         .backdrop-blur {
             position: absolute;
@@ -57,24 +81,27 @@
         }
 
         /* =========================================
-           CONTENEDOR PRINCIPAL (9:16)
+           CONTENEDOR PRINCIPAL
            ========================================= */
         .mobile-wrapper {
             position: relative;
             z-index: 10;
-            aspect-ratio: 9 / 16;
-            height: 100dvh;
-            max-height: 100vh;
-            max-width: 100vw;
             background-image: var(--bg-image);
             background-size: cover;
             background-position: center;
             box-shadow: 0 0 60px rgba(0,0,0,0.9);
             overflow: hidden;
+            width: 100vw;
+            height: 100dvh; 
         }
 
         @media (min-width: 600px) {
-            .mobile-wrapper { border-radius: 20px; height: 95vh; }
+            .mobile-wrapper { 
+                width: auto;
+                aspect-ratio: 9 / 16;
+                height: 95vh;
+                border-radius: 20px; 
+            }
         }
 
         /* =========================================
@@ -83,29 +110,26 @@
         .view-section {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            display: none; /* Se activan con JS */
+            display: none;
             flex-direction: column;
             opacity: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            z-index: 20; /* Base Z-index for views */
         }
 
         .view-section.active {
             display: flex;
-            opacity: 1; /* GSAP manejará la transición, pero esto es fallback */
+            opacity: 1;
             z-index: 100;
         }
 
-        /* Home View conserva la imagen de fondo limpia */
         #home-view {
-            display: block; /* Visible por defecto */
+            display: block;
             opacity: 1;
             z-index: 50;
-        }
-
-        /* Subpáginas tienen fondo oscuro semitransparente */
-        .sub-page {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            padding: 20px;
+            background: transparent; 
+            backdrop-filter: none;
         }
 
         /* =========================================
@@ -117,28 +141,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            
-            /* Tipografía LLAMATIVA */
             color: var(--text-black);
             text-decoration: none;
             text-transform: uppercase;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 900; /* Ultra Bold */
-            font-size: 15px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 18px;
             letter-spacing: 2px;
-            
-            /* Estilo Oro Metalizado */
-            background: linear-gradient(135deg, #fceabb 0%, #f8b500 50%, #fbdf93 100%);
+            background: linear-gradient(135deg, #fceabb 0%, #ffd19c 50%, #ffdea1 100%);
             border: 2px solid #fff;
             border-radius: 50px;
-            
             box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,255,255,0.5);
             cursor: pointer;
             z-index: 20;
-            overflow: hidden; /* Para efecto brillo */
+            overflow: hidden;
         }
 
-        /* Efecto Brillo (Shine) al pasar */
         .btn-gold::after {
             content: '';
             position: absolute;
@@ -150,136 +168,194 @@
         }
         .btn-gold:hover::after { left: 150%; transition: 0.7s; }
 
-        /* POSICIONES (Ajustables) */
+        /* POSICIONES ORIGINALES HOME */
         #btn-invitacion { top: 50%; left: 75%; width: 42%; height: 6.5%; }
-        #btn-galeria { top: 59%; left: 75%; width: 42%; height: 6.5%; }
-        #btn-recuerdo { top: 80%; left: 50%; width: 55%; height: 7.5%; font-size: 16px; }
+        #btn-galeria-home { top: 59%; left: 75%; width: 42%; height: 6.5%; }
+        #btn-recuerdo-home { top: 80%; left: 50%; width: 55%; height: 7.5%; font-size: 16px; }
 
         /* =========================================
-           SUBPÁGINAS - ESTILOS ESPECÍFICOS
+           ESTILOS ESPECÍFICOS DE SUBPÁGINAS
            ========================================= */
         
-        /* Botón Volver */
         .btn-back {
             position: absolute;
-            top: 20px; left: 20px;
-            background: transparent;
+            top: 25px; left: 20px;
+            background: rgba(0,0,0,0.5);
             border: 1px solid var(--gold-mid);
             color: var(--gold-mid);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 200;
-        }
-
-        /* 1. INVITACIÓN */
-        .invite-content {
-            height: 100%;
+            width: 40px; height: 40px;
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 200;
+            transition: 0.3s;
+        }
+        .btn-back:hover { background: var(--gold-mid); color: #000; }
+
+        /* --- 1. INVITACIÓN --- */
+        #view-invitacion {
+            background-image: var(--bg-invitacion);
+            background-size: cover;
+            background-position: center;
+            box-shadow: inset 0 0 0 2000px rgba(0,0,0,0.7); 
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .invite-container {
             text-align: center;
-            border: 1px solid var(--gold-mid);
-            padding: 20px;
-            margin-top: 50px; /* espacio para botón volver */
-            margin-bottom: 20px;
-        }
-        .invite-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem;
-            color: var(--gold-mid);
-            margin-bottom: 20px;
-            line-height: 1;
-        }
-        .invite-text {
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            color: #eee;
-        }
-
-        /* 2. GALERÍA */
-        .gallery-container {
-            margin-top: 80px;
-            height: 80%;
-            overflow-y: scroll; /* Scroll vertical */
-            padding-bottom: 50px;
-            /* Ocultar barra scroll */
-            scrollbar-width: none; 
-            -ms-overflow-style: none;
-        }
-        .gallery-container::-webkit-scrollbar { display: none; }
-
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        .gallery-img {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-            border: 1px solid var(--gold-dark);
-            opacity: 0; /* Para animar entrada */
-            transform: translateY(20px);
-        }
-
-        /* 3. RECUERDO */
-        .memory-header {
-            margin-top: 80px;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .memory-title {
-            color: var(--gold-mid);
-            font-size: 2rem;
-            text-transform: uppercase;
-            font-weight: 900;
-            margin-bottom: 10px;
-        }
-        .memory-actions {
+            height: 100%; /* Full height to distribute space */
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            width: 100%;
             align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .btn-elegant {
-            width: 80%;
-            padding: 15px;
-            background: transparent;
-            border: 1px solid var(--gold-light);
+
+        .invite-script-text {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2.2rem;
+            line-height: 1.2;
             color: var(--gold-light);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            margin-bottom: 30px;
+            width: 90%;
+        }
+
+        /* Botones Submenú Estilizados */
+        .sub-nav-btn {
+            background: rgba(212, 175, 55, 0.1); /* Gold tint very subtle */
+            border: 1px solid var(--gold-mid);
+            color: white;
+            padding: 18px 0; /* Más alto */
+            width: 100%; /* Ocupa todo el ancho del contenedor */
+            max-width: 320px;
             text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-align: center;
+            letter-spacing: 4px;
+            font-size: 1.1rem; /* Letra más grande */
+            font-weight: 700;
+            cursor: pointer;
             transition: 0.3s;
+            font-family: 'Montserrat', sans-serif;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .btn-elegant:hover {
+        .sub-nav-btn:hover {
             background: var(--gold-mid);
             color: #000;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+
+        /* --- 2. UBICACIÓN --- */
+        #view-ubicacion {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .map-frame {
+            width: 90%;
+            height: 300px;
+            border: 2px solid var(--gold-mid);
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        /* --- 3. GALERÍA --- */
+        .gallery-wrapper {
+            width: 100%;
+            height: 60vh;
+            margin-top: 80px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        .gallery-track {
+            display: flex;
+            gap: 20px;
+            padding: 0 40px;
+            width: fit-content;
+            cursor: grab;
+        }
+
+        .gallery-card {
+            width: 250px;
+            height: 350px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--gold-mid);
+            flex-shrink: 0;
+            position: relative;
+        }
+        .gallery-card img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        /* Lightbox (Zoom) */
+        #lightbox {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+        }
+        #lightbox img {
+            max-width: 95%;
+            max-height: 80%;
+            border: 2px solid var(--gold-mid);
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.3);
+        }
+        #lightbox .close-lb {
+            position: absolute;
+            top: 20px; right: 20px;
+            color: white; font-size: 30px; cursor: pointer;
+        }
+
+        /* --- 4. RECUERDO --- */
+        #view-recuerdo {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 0; 
+        }
+        
+        .video-container {
+            width: 100%;
+            height: 90%; 
+            margin-top: auto;
+            margin-bottom: auto;
+            position: relative;
+            background: #000;
+            border-top: 1px solid var(--gold-mid);
+            border-bottom: 1px solid var(--gold-mid);
+        }
+        
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         /* =========================================
-           FOOTER (Parpadeante)
+           FOOTER
            ========================================= */
         .footer-hunter {
             position: absolute;
-            bottom: 3%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            text-align: center;
-            z-index: 60;
-            pointer-events: none;
+            bottom: 3%; left: 50%; transform: translate(-50%, -50%);
+            width: 100%; text-align: center; z-index: 60; pointer-events: none;
         }
         
         .footer-hunter span {
@@ -292,18 +368,8 @@
         }
 
         @keyframes flicker {
-            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-                text-shadow: 
-                    0 0 4px #fff,
-                    0 0 10px #fff,
-                    0 0 20px var(--gold-mid),
-                    0 0 40px var(--gold-mid);
-                opacity: 1;
-            }
-            20%, 24%, 55% {
-                text-shadow: none;
-                opacity: 0.5;
-            }
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { text-shadow: 0 0 4px #fff, 0 0 20px var(--gold-mid); opacity: 1; }
+            20%, 24%, 55% { text-shadow: none; opacity: 0.5; }
         }
 
     </style>
@@ -314,89 +380,100 @@
     <div class="backdrop-blur"></div>
 
     <div class="mobile-wrapper">
+
+        <!-- Contenedor de Partículas -->
+        <div id="particles-container"></div>
         
+        <!-- Lightbox para Galería -->
+        <div id="lightbox" onclick="closeLightbox()">
+            <div class="close-lb">&times;</div>
+            <img id="lightbox-img" src="" alt="">
+        </div>
+
         <!-- =========================================
-             VISTA 1: HOME (Menú Principal)
+             VISTA 1: HOME
              ========================================= -->
         <section id="home-view">
-            <!-- BOTÓN 1 -->
-            <a onclick="navigateTo('invitacion')" class="btn-gold" id="btn-invitacion">
-                Invitación
-            </a>
-
-            <!-- BOTÓN 2 -->
-            <a onclick="navigateTo('galeria')" class="btn-gold" id="btn-galeria">
-                Galería
-            </a>
-
-            <!-- BOTÓN 3 -->
-            <a onclick="navigateTo('recuerdo')" class="btn-gold" id="btn-recuerdo">
-                Recuerdo
-            </a>
-
-            <!-- Footer -->
-            <div class="footer-hunter">
-                <span>HunterDesigner</span>
-            </div>
+            <a onclick="navigateTo('invitacion')" class="btn-gold" id="btn-invitacion">Invitación</a>
+            <a onclick="navigateTo('galeria')" class="btn-gold" id="btn-galeria-home">Galería</a>
+            <a onclick="navigateTo('recuerdo')" class="btn-gold" id="btn-recuerdo-home">Recuerdo</a>
+            <div class="footer-hunter"><span>HunterDesigner</span></div>
         </section>
 
         <!-- =========================================
-             VISTA 2: INVITACIÓN (Subpágina)
+             VISTA 2: INVITACIÓN
              ========================================= -->
-        <section id="view-invitacion" class="view-section sub-page">
-            <button class="btn-back" onclick="goHome()">← Volver</button>
+        <section id="view-invitacion" class="view-section">
+            <button class="btn-back" onclick="goBack('home')"><i class="ph ph-arrow-left"></i></button>
             
-            <div class="invite-content">
-                <h2 class="invite-title">You are<br>Invited</h2>
-                <p class="invite-text">
-                    Celebra con nosotros una noche inolvidable llena de magia, elegancia y momentos únicos.
+            <div class="invite-container">
+                <h2 style="font-family: 'Playfair Display'; color: white; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px;">Celebración</h2>
+                
+                <p class="invite-script-text">
+                    "La magia de la vida está en los momentos compartidos. Acompáñanos a celebrar una noche inolvidable llena de alegría, música y amor eterno."
                 </p>
-                <div style="width: 50px; height: 2px; background: var(--gold-mid); margin: 20px auto;"></div>
-                <p style="font-size: 0.9rem; color: var(--gold-light);">
-                    VIERNES 24 DE NOVIEMBRE<br>
-                    20:00 HRS<br>
-                    HOTEL IMPERIAL
-                </p>
-            </div>
-        </section>
 
-        <!-- =========================================
-             VISTA 3: GALERÍA (Carousel)
-             ========================================= -->
-        <section id="view-galeria" class="view-section sub-page">
-            <button class="btn-back" onclick="goHome()">← Volver</button>
-            
-            <div class="gallery-container">
-                <div class="gallery-grid">
-                    <!-- 8 Imágenes de ejemplo (Unsplash) -->
-                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80" class="gallery-img">
-                    <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80" class="gallery-img">
-                    <img src="https://images.unsplash.com/photo-1520854221256-17451cc330e7?auto=format&fit=crop&w=600&q=80" class="gallery-img">
-                    <img src="https://images.unsplash.com/photo-1519225421980-715cb0202128?auto=format&fit=crop&w=600&q=80" class="gallery-img">
-                    <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=600&q=80" class="gallery-img">
-                    <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80" class="gallery-img">
-                    <img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=600&q=80" class="gallery-img">
-                    <img src="https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?auto=format&fit=crop&w=600&q=80" class="gallery-img">
+                <!-- 3 Botones solicitados con Estilo Elegante -->
+                <div style="display: flex; flex-direction: column; gap: 20px; width: 100%; align-items: center;">
+                    <button class="sub-nav-btn" onclick="navigateTo('ubicacion')">UBICACIÓN</button>
+                    <button class="sub-nav-btn" onclick="navigateTo('galeria')">GALERÍA</button>
+                    <button class="sub-nav-btn" onclick="navigateTo('recuerdo')">RECUERDOS</button>
                 </div>
             </div>
         </section>
 
         <!-- =========================================
-             VISTA 4: RECUERDO (Botones)
+             VISTA 3: UBICACIÓN
              ========================================= -->
-        <section id="view-recuerdo" class="view-section sub-page">
-            <button class="btn-back" onclick="goHome()">← Volver</button>
+        <section id="view-ubicacion" class="view-section">
+            <button class="btn-back" onclick="goBack('invitacion')"><i class="ph ph-arrow-left"></i></button>
             
-            <div class="memory-header">
-                <h2 class="memory-title">Memories</h2>
-                <p>Nuestra historia en capítulos</p>
-            </div>
+            <h2 class="invite-script-text" style="font-size: 3rem;">Nuestra Ubicación</h2>
+            <p style="color: #ccc; margin-bottom: 10px;">Edificio Burano<br>La Paz, Bolivia</p>
+            
+            <!-- Mapa Iframe Solicitado -->
+            <iframe class="map-frame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d507.18061890062484!2d-68.12657909788366!3d-16.500529058268803!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x915f218d943d91d9%3A0x806280056b820b22!2sEdificio%20Burano!5e1!3m2!1ses!2sbo!4v1769987961397!5m2!1ses!2sbo" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            
+            <!-- Botón Ver Mapa Solicitado -->
+            <a href="https://maps.app.goo.gl/6vUnDNdtYt7A6uY39" target="_blank" class="btn-gold" style="position: relative; transform: none; top: auto; left: auto; margin-top: 30px; width: 80%; font-size: 14px;">
+                ABRIR EN GOOGLE MAPS
+            </a>
+        </section>
 
-            <div class="memory-actions">
-                <button class="btn-elegant">Biografía</button>
-                <button class="btn-elegant">Video Highlights</button>
-                <button class="btn-elegant">Libro de Firmas</button>
-                <button class="btn-elegant">Agradecimientos</button>
+        <!-- =========================================
+             VISTA 4: GALERÍA
+             ========================================= -->
+        <section id="view-galeria" class="view-section">
+            <!-- Botón vuelve a HOME -->
+            <button class="btn-back" onclick="goBack('home')"><i class="ph ph-arrow-left"></i></button>
+            
+            <h2 style="position: absolute; top: 30px; width: 100%; text-align: center; color: var(--gold-mid); font-family: 'Playfair Display'; text-transform: uppercase;">Galería</h2>
+
+            <div class="gallery-wrapper">
+                <div class="gallery-track">
+                    <!-- Imágenes con doble clic para Zoom -->
+                    <div class="gallery-card" ondblclick="openLightbox(this)"><img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="gallery-card" ondblclick="openLightbox(this)"><img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="gallery-card" ondblclick="openLightbox(this)"><img src="https://images.unsplash.com/photo-1520854221256-17451cc330e7?auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="gallery-card" ondblclick="openLightbox(this)"><img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=600&q=80"></div>
+                    <div class="gallery-card" ondblclick="openLightbox(this)"><img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80"></div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 10px; font-size: 10px; color: #888;">DESLIZA O HAZ DOBLE CLIC</p>
+        </section>
+
+        <!-- =========================================
+             VISTA 5: RECUERDO
+             ========================================= -->
+        <section id="view-recuerdo" class="view-section">
+            <!-- Botón vuelve a HOME -->
+            <button class="btn-back" style="position: absolute; top: 20px; left: 20px; z-index: 200;" onclick="goBack('home')"><i class="ph ph-arrow-left"></i></button>
+            
+            <div class="video-container">
+                <video controls controlsList="nodownload" poster="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=80">
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-vertical-shot-of-a-woman-dancing-at-a-party-43632-large.mp4" type="video/mp4">
+                    Tu navegador no soporta video.
+                </video>
             </div>
         </section>
 
@@ -404,7 +481,41 @@
 
     <!-- SCRIPT GSAP LOGIC -->
     <script>
-        // Animación Inicial de los botones del Home
+        // --- 0. Partículas Flotantes ---
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 25;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Tamaño aleatorio
+                const size = Math.random() * 4 + 1; 
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Posición inicial aleatoria
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                container.appendChild(particle);
+
+                // Animación infinita
+                gsap.to(particle, {
+                    y: "-=100", // Mover hacia arriba
+                    x: `random(-20, 20)`, // Movimiento lateral suave
+                    opacity: "random(0, 0.8)",
+                    duration: `random(3, 8)`,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                });
+            }
+        }
+        createParticles();
+
+        // --- 1. Animación Inicial Home ---
         gsap.from(".btn-gold", {
             duration: 1.2,
             y: 50,
@@ -414,69 +525,93 @@
             delay: 0.5
         });
 
-        // Función para Navegar a Subpáginas
-        function navigateTo(pageId) {
-            // 1. Desvanecer el Home
-            gsap.to("#home-view", {
-                duration: 0.5,
-                opacity: 0,
-                scale: 0.95,
-                pointerEvents: "none",
-                ease: "power2.inOut",
-                onComplete: () => {
-                    document.getElementById('home-view').style.display = 'none';
-                }
-            });
+        // --- 2. Lightbox Logic (Zoom) ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
 
-            // 2. Preparar y Mostrar la nueva vista
-            const view = document.getElementById(`view-${pageId}`);
-            view.style.display = 'flex';
-            
-            gsap.fromTo(view, 
-                { opacity: 0, scale: 1.05 },
-                { duration: 0.6, opacity: 1, scale: 1, ease: "power2.out", delay: 0.1 }
-            );
-
-            // ANIMACIONES ESPECÍFICAS POR PÁGINA
-            if(pageId === 'invitacion') {
-                gsap.fromTo(".invite-content > *", 
-                    { y: 30, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, delay: 0.3 }
-                );
-            }
-            
-            if(pageId === 'galeria') {
-                gsap.fromTo(".gallery-img", 
-                    { y: 50, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, delay: 0.3 }
-                );
-            }
-
-            if(pageId === 'recuerdo') {
-                gsap.fromTo(".memory-header", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, delay: 0.3 });
-                gsap.fromTo(".btn-elegant", 
-                    { x: -50, opacity: 0 },
-                    { x: 0, opacity: 1, duration: 0.5, stagger: 0.1, delay: 0.5 }
-                );
-            }
+        function openLightbox(element) {
+            const img = element.querySelector('img');
+            lightboxImg.src = img.src;
+            lightbox.style.display = 'flex';
+            gsap.to(lightbox, { opacity: 1, duration: 0.3 });
         }
 
-        // Función para volver al Home
-        function goHome() {
-            // Ocultar todas las subpáginas
-            gsap.to(".view-section.sub-page", {
-                duration: 0.4,
-                opacity: 0,
-                ease: "power2.in",
+        function closeLightbox() {
+            gsap.to(lightbox, { 
+                opacity: 0, 
+                duration: 0.3, 
+                onComplete: () => { lightbox.style.display = 'none'; } 
+            });
+        }
+
+        // --- 3. Sistema de Navegación ---
+        function navigateTo(pageId) {
+            const currentView = document.querySelector('.view-section.active') || document.getElementById('home-view');
+            
+            // Animación Salida
+            gsap.to(currentView, {
+                duration: 0.5, opacity: 0, scale: 0.95, ease: "power2.inOut",
                 onComplete: () => {
-                    document.querySelectorAll('.view-section.sub-page').forEach(el => el.style.display = 'none');
+                    currentView.style.display = 'none';
+                    currentView.classList.remove('active');
                     
-                    // Mostrar Home
-                    const home = document.getElementById('home-view');
-                    home.style.display = 'block';
-                    home.style.pointerEvents = 'all';
+                    const nextView = document.getElementById(`view-${pageId}`);
+                    nextView.style.display = 'flex';
+                    nextView.classList.add('active');
+
+                    // Animación Entrada
+                    gsap.fromTo(nextView, 
+                        { opacity: 0, scale: 1.05 },
+                        { duration: 0.6, opacity: 1, scale: 1, ease: "power2.out" }
+                    );
+
+                    // Animaciones Específicas
+                    if(pageId === 'invitacion') {
+                        gsap.fromTo(".invite-script-text", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 0.3 });
+                        
+                        // Efecto GSAP Elegante en los botones
+                        gsap.fromTo(".sub-nav-btn", 
+                            { y: 30, opacity: 0 }, 
+                            { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, delay: 0.5, ease: "back.out(1.7)" }
+                        );
+                        
+                        // Resplandor continuo suave
+                        gsap.to(".sub-nav-btn", {
+                            boxShadow: "0 0 15px rgba(212, 175, 55, 0.4)",
+                            duration: 2,
+                            yoyo: true,
+                            repeat: -1,
+                            stagger: 0.5
+                        });
+                    }
+                    if(pageId === 'galeria') {
+                        Draggable.create(".gallery-track", { type: "x", bounds: ".gallery-wrapper", inertia: true });
+                        gsap.from(".gallery-card", { y: 50, opacity: 0, duration: 0.6, stagger: 0.1, delay: 0.3 });
+                    }
+                }
+            });
+        }
+
+        // --- 4. Función Volver Mejorada ---
+        function goBack(target) {
+            let nextId = target === 'home' ? 'home-view' : `view-${target}`;
+            
+            const currentView = document.querySelector('.view-section.active');
+            
+            gsap.to(currentView, {
+                duration: 0.4, opacity: 0, ease: "power2.in",
+                onComplete: () => {
+                    currentView.style.display = 'none';
+                    currentView.classList.remove('active');
                     
-                    gsap.fromTo(home,
+                    const nextView = document.getElementById(nextId);
+                    if(target === 'home') nextView.style.display = 'block'; 
+                    else {
+                        nextView.style.display = 'flex';
+                        nextView.classList.add('active');
+                    }
+                    
+                    gsap.fromTo(nextView,
                         { opacity: 0, scale: 0.95 },
                         { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }
                     );
@@ -484,10 +619,8 @@
             });
         }
 
-        // Fix height mobile
-        function setAppHeight() {
-            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
-        }
+        // Ajuste altura móvil
+        function setAppHeight() { document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`); }
         window.addEventListener('resize', setAppHeight);
         setAppHeight();
     </script>
